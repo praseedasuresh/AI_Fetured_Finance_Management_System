@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Fee Structure - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="h3 mb-0">Delete Fee Structure</h1>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Confirm Deletion</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> This action cannot be undone. All data associated with this fee structure will be permanently deleted.
+                    </div>
+                    
+                    <h5 class="mb-3">Are you sure you want to delete the following fee structure?</h5>
+                    
+                    <div class="mb-4">
+                        <div class="mb-2"><strong>Name:</strong> {{ structure.name }}</div>
+                        <div class="mb-2"><strong>Category:</strong> {{ structure.category }}</div>
+                        <div class="mb-2"><strong>Academic Year:</strong> {{ structure.academic_year }}</div>
+                        <div class="mb-2"><strong>Department:</strong> {{ structure.department|default:"All Departments" }}</div>
+                        <div class="mb-2"><strong>Amount:</strong> ${{ structure.amount }}</div>
+                        <div><strong>Description:</strong> {{ structure.description }}</div>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'fee_structure_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash-alt me-2"></i>Delete Permanently
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

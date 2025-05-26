@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load ai_assistant_extras %}
+
+{% block title %}Anomaly Detail{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Anomaly Detail</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'anomaly_dashboard' %}">Anomaly Detection</a></li>
+        <li class="breadcrumb-item active">Anomaly Detail</li>
+    </ol>
+    
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    Anomaly Information
+                    <div class="float-end">
+                        {% if anomaly.is_reviewed %}
+                            {% if anomaly.is_false_positive %}
+                                <span class="badge bg-success">False Positive</span>
+                            {% else %}
+                                <span class="badge bg-primary">Reviewed</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge bg-warning">Unreviewed</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Anomaly Type</h5>
+                            {% if anomaly.anomaly_type == 'amount' %}
+                                <span class="badge bg-danger">Unusual Amount</span>
+                            {% elif anomaly.anomaly_type == 'frequency' %}
+                                <span class="badge bg-warning">Unusual Frequency</span>
+                            {% elif anomaly.anomaly_type == 'category' %}
+                                <span class="badge bg-info">Category Mismatch</span>
+                            {% elif anomaly.anomaly_type == 'department' %}
+                                <span class="badge bg-primary">Department Anomaly</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Other</span>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Confidence Score</h5>
+                            <div class="progress">
+                                <div class="progress-bar {% if anomaly.confidence_score > 0.8 %}bg-danger{% elif anomaly.confidence_score > 0.7 %}bg-warning{% else %}bg-info{% endif %}" 
+                                    role="progressbar" 
+                                    style="width: {{ anomaly.confidence_score|floatformat:2|multiply:100 }}%" 
+                                    aria-valuenow="{{ anomaly.confidence_score|floatformat:2|multiply:100 }}" 
+                                    aria-valuemin="0" 
+                                    aria-valuemax="100">
+                                    {{ anomaly.confidence_score|floatformat:2 }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Description</h5>
+                        <div class="alert alert-info">
+                            {{ anomaly.description }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5>Expense Details</h5>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th style="width: 200px;">Title</th>
+                                    <td>{{ anomaly.expense.title }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Amount</th>
+                                    <td>${{ anomaly.expense.amount }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Date</th>
+                                    <td>{{ anomaly.expense.date }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Department</th>
+                                    <td>{{ anomaly.expense.department.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Category</th>
+                                    <td>{{ anomaly.expense.category.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Description</th>
+                                    <td>{{ anomaly.expense.description }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    {% if not anomaly.is_reviewed %}
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5>Review Actions</h5>
+                            <form method="post" class="d-flex">
+                                {% csrf_token %}
+                                <button type="submit" name="action" value="mark_reviewed" class="btn btn-primary me-2">
+                                    <i class="fas fa-check"></i> Mark as Reviewed
+                                </button>
+                                <button type="submit" name="action" value="mark_false_positive" class="btn btn-success">
+                                    <i class="fas fa-times"></i> Mark as False Positive
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5>Review Information</h5>
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th style="width: 200px;">Reviewed By</th>
+                                    <td>{{ anomaly.reviewed_by.get_full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Reviewed At</th>
+                                    <td>{{ anomaly.reviewed_at }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Status</th>
+                                    <td>
+                                        {% if anomaly.is_false_positive %}
+                                            <span class="badge bg-success">False Positive</span>
+                                        {% else %}
+                                            <span class="badge bg-primary">Confirmed Anomaly</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-list me-1"></i>
+                    Related Expenses
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for expense in related_expenses %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ expense.title }}</h6>
+                                <small>${{ expense.amount }}</small>
+                            </div>
+                            <p class="mb-1">{{ expense.date }}</p>
+                            <small>{{ expense.category.name }}</small>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item">
+                            <p class="mb-0 text-center">No related expenses found.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-cogs me-1"></i>
+                    Actions
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'anomaly_dashboard' %}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                        <a href="{% url 'run_anomaly_detection' %}" class="btn btn-info">
+                            <i class="fas fa-sync"></i> Run Detection Again
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

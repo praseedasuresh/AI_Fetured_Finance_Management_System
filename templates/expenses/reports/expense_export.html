@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Report - Finance Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #4e73df;
+            padding-bottom: 10px;
+        }
+        .logo {
+            max-width: 150px;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: #4e73df;
+            margin: 0;
+            font-size: 24px;
+        }
+        h2 {
+            color: #4e73df;
+            font-size: 18px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e3e6f0;
+            padding-bottom: 5px;
+        }
+        .report-info {
+            margin-bottom: 20px;
+        }
+        .report-info table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .report-info td {
+            padding: 5px;
+            vertical-align: top;
+        }
+        .report-info td:first-child {
+            font-weight: bold;
+            width: 150px;
+        }
+        .summary {
+            margin-bottom: 20px;
+        }
+        .summary-cards {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .summary-card {
+            border: 1px solid #e3e6f0;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            width: 23%;
+        }
+        .summary-card h3 {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .summary-card p {
+            margin: 5px 0 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .summary-card.total {
+            background-color: #4e73df;
+            color: white;
+        }
+        .summary-card.total h3 {
+            color: white;
+        }
+        .summary-card.approved {
+            background-color: #1cc88a;
+            color: white;
+        }
+        .summary-card.approved h3 {
+            color: white;
+        }
+        .summary-card.paid {
+            background-color: #36b9cc;
+            color: white;
+        }
+        .summary-card.paid h3 {
+            color: white;
+        }
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+        table.data-table th {
+            background-color: #4e73df;
+            color: white;
+            text-align: left;
+            padding: 8px;
+            font-weight: bold;
+        }
+        table.data-table td {
+            padding: 8px;
+            border-bottom: 1px solid #e3e6f0;
+        }
+        table.data-table tr:nth-child(even) {
+            background-color: #f8f9fc;
+        }
+        .category-badge {
+            display: inline-block;
+            padding: 3px 6px;
+            border-radius: 3px;
+            color: white;
+            font-size: 11px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+        .status-draft {
+            background-color: #858796;
+            color: white;
+        }
+        .status-submitted {
+            background-color: #f6c23e;
+            color: white;
+        }
+        .status-approved {
+            background-color: #1cc88a;
+            color: white;
+        }
+        .status-rejected {
+            background-color: #e74a3b;
+            color: white;
+        }
+        .status-paid {
+            background-color: #36b9cc;
+            color: white;
+        }
+        .group-header {
+            background-color: #f8f9fc;
+            font-weight: bold;
+            padding: 8px;
+            border-bottom: 2px solid #4e73df;
+            margin-top: 15px;
+            margin-bottom: 5px;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #e3e6f0;
+            padding-top: 10px;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f8f9fc;
+        }
+        @page {
+            size: landscape;
+            margin: 1cm;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        {% if logo_url %}
+        <img src="{{ logo_url }}" alt="Logo" class="logo">
+        {% endif %}
+        <h1>Expense Report</h1>
+        <p>Finance Management System</p>
+    </div>
+
+    <div class="report-info">
+        <table>
+            <tr>
+                <td>Report Date:</td>
+                <td>{{ report_date|date:"F d, Y H:i" }}</td>
+                <td>Generated By:</td>
+                <td>{{ user.get_full_name }}</td>
+            </tr>
+            <tr>
+                <td>Period:</td>
+                <td>{% if filters.start_date %}{{ filters.start_date|date:"F d, Y" }}{% endif %} - {% if filters.end_date %}{{ filters.end_date|date:"F d, Y" }}{% endif %}</td>
+                <td>Filters Applied:</td>
+                <td>
+                    {% if filters.category %}Category: {{ category_name }}{% endif %}
+                    {% if filters.department %}<br>Department: {{ department_name }}{% endif %}
+                    {% if filters.status %}<br>Status: {{ filters.status|title }}{% endif %}
+                    {% if filters.payment_method %}<br>Payment Method: {{ payment_method_display }}{% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="summary">
+        <h2>Summary</h2>
+        <div class="summary-cards">
+            <div class="summary-card">
+                <h3>Total Expenses</h3>
+                <p>{{ summary.count }}</p>
+            </div>
+            <div class="summary-card total">
+                <h3>Total Amount</h3>
+                <p>${{ summary.total_amount|floatformat:2 }}</p>
+            </div>
+            <div class="summary-card approved">
+                <h3>Approved Amount</h3>
+                <p>${{ summary.approved_amount|floatformat:2 }}</p>
+            </div>
+            <div class="summary-card paid">
+                <h3>Paid Amount</h3>
+                <p>${{ summary.paid_amount|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div>
+
+    <h2>Expense Details</h2>
+    
+    {% if filters.group_by %}
+    <!-- Grouped Data -->
+    {% for group, group_expenses in grouped_expenses.items %}
+    <div class="group-header">{{ group }}</div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Payment Method</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in group_expenses %}
+            <tr>
+                <td>{{ expense.title }}</td>
+                <td>{{ expense.date|date:"M d, Y" }}</td>
+                <td>
+                    <span class="category-badge" style="background-color: {{ expense.category.color }}">
+                        {{ expense.category.name }}
+                    </span>
+                </td>
+                <td>
+                    {% if expense.status == 'draft' %}
+                    <span class="status-badge status-draft">Draft</span>
+                    {% elif expense.status == 'submitted' %}
+                    <span class="status-badge status-submitted">Submitted</span>
+                    {% elif expense.status == 'approved' %}
+                    <span class="status-badge status-approved">Approved</span>
+                    {% elif expense.status == 'rejected' %}
+                    <span class="status-badge status-rejected">Rejected</span>
+                    {% elif expense.status == 'paid' %}
+                    <span class="status-badge status-paid">Paid</span>
+                    {% endif %}
+                </td>
+                <td>{{ expense.get_payment_method_display }}</td>
+                <td>${{ expense.amount|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="5" style="text-align: right;">Group Total:</td>
+                <td>${{ group_totals|get_item:group|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+    {% endfor %}
+    {% else %}
+    <!-- Ungrouped Data -->
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Department</th>
+                <th>Created By</th>
+                <th>Status</th>
+                <th>Payment Method</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in expenses %}
+            <tr>
+                <td>{{ expense.title }}</td>
+                <td>{{ expense.date|date:"M d, Y" }}</td>
+                <td>
+                    <span class="category-badge" style="background-color: {{ expense.category.color }}">
+                        {{ expense.category.name }}
+                    </span>
+                </td>
+                <td>{{ expense.budget.department.name|default:"N/A" }}</td>
+                <td>{{ expense.created_by.get_full_name }}</td>
+                <td>
+                    {% if expense.status == 'draft' %}
+                    <span class="status-badge status-draft">Draft</span>
+                    {% elif expense.status == 'submitted' %}
+                    <span class="status-badge status-submitted">Submitted</span>
+                    {% elif expense.status == 'approved' %}
+                    <span class="status-badge status-approved">Approved</span>
+                    {% elif expense.status == 'rejected' %}
+                    <span class="status-badge status-rejected">Rejected</span>
+                    {% elif expense.status == 'paid' %}
+                    <span class="status-badge status-paid">Paid</span>
+                    {% endif %}
+                </td>
+                <td>{{ expense.get_payment_method_display }}</td>
+                <td>${{ expense.amount|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="7" style="text-align: right;">Total:</td>
+                <td>${{ summary.total_amount|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+    {% endif %}
+
+    <div class="footer">
+        <p>Generated on {{ report_date|date:"F d, Y H:i" }} | Finance Management System</p>
+    </div>
+</body>
+</html>

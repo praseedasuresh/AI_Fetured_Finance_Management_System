@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Finance Assistant - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>AI Finance Assistant</h2>
+            <p class="text-muted">Ask questions about expenses, budgets, and financial data in natural language.</p>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left column - Chat sessions -->
+        <div class="col-lg-4 col-md-12 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Your Conversations</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2 mb-3">
+                        <a href="{% url 'new_chat_session' %}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i> New Conversation
+                        </a>
+                    </div>
+                    
+                    {% if chat_sessions %}
+                        <div class="list-group">
+                            {% for session in chat_sessions %}
+                                <a href="{% url 'chat_session' session.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ session.title|default:"Untitled Chat" }}</h6>
+                                        <small class="text-muted">{{ session.created_at|date:"M d, Y" }}</small>
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill">
+                                        {{ session.messages.count }}
+                                    </span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            You don't have any conversations yet. Start a new one!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right column - Recent queries and tips -->
+        <div class="col-lg-8 col-md-12">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Recent Queries</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_queries %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Query</th>
+                                        <th>Date</th>
+                                        <th>Time (sec)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for query in recent_queries %}
+                                        <tr>
+                                            <td>{{ query.query_text|truncatechars:50 }}</td>
+                                            <td>{{ query.created_at|date:"M d, Y H:i" }}</td>
+                                            <td>{{ query.execution_time|floatformat:2 }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            You haven't made any queries yet. Start a conversation to ask questions!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Example Questions You Can Ask</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">Budget Analysis</h6>
+                                    <ul class="mb-0">
+                                        <li>What's our total budget for this academic year?</li>
+                                        <li>How much budget is allocated to the Engineering department?</li>
+                                        <li>Compare budget allocation between departments</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">Expense Tracking</h6>
+                                    <ul class="mb-0">
+                                        <li>What were our highest expenses last month?</li>
+                                        <li>Show me a breakdown of expenses by category</li>
+                                        <li>Compare Q1 and Q2 expenses</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">Fee Management</h6>
+                                    <ul class="mb-0">
+                                        <li>What's the total fee collection this semester?</li>
+                                        <li>How many students have outstanding fees?</li>
+                                        <li>Show me fee payment trends</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Financial Reports</h6>
+                                    <ul class="mb-0">
+                                        <li>Generate a summary of our financial position</li>
+                                        <li>What's our income vs. expenses this year?</li>
+                                        <li>Show me budget utilization by department</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+
+{% block title %}Budget Details - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12 d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0">Budget Details</h1>
+            <div>
+                {% if budget.status == 'draft' or budget.status == 'rejected' %}
+                <a href="{% url 'budget_update' budget.id %}" class="btn btn-primary me-2">
+                    <i class="fas fa-edit me-2"></i>Edit
+                </a>
+                {% endif %}
+                
+                {% if budget.status == 'draft' %}
+                <a href="{% url 'budget_delete' budget.id %}" class="btn btn-danger me-2">
+                    <i class="fas fa-trash-alt me-2"></i>Delete
+                </a>
+                {% endif %}
+                
+                <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Budget Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Title:</div>
+                        <div class="col-md-8">{{ budget.title }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Department:</div>
+                        <div class="col-md-8">{{ budget.department }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Category:</div>
+                        <div class="col-md-8">{{ budget.category }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Academic Year:</div>
+                        <div class="col-md-8">{{ budget.academic_year }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Amount:</div>
+                        <div class="col-md-8">${{ budget.amount|floatformat:2 }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Status:</div>
+                        <div class="col-md-8">
+                            {% if budget.status == 'draft' %}
+                            <span class="badge bg-secondary">Draft</span>
+                            {% elif budget.status == 'submitted' %}
+                            <span class="badge bg-warning">Submitted for Approval</span>
+                            {% elif budget.status == 'approved' %}
+                            <span class="badge bg-success">Approved</span>
+                            {% elif budget.status == 'rejected' %}
+                            <span class="badge bg-danger">Rejected</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Submitted By:</div>
+                        <div class="col-md-8">{{ budget.submitted_by }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Created At:</div>
+                        <div class="col-md-8">{{ budget.created_at }}</div>
+                    </div>
+                    {% if budget.approved_by %}
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Approved By:</div>
+                        <div class="col-md-8">{{ budget.approved_by }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Approved At:</div>
+                        <div class="col-md-8">{{ budget.approved_at }}</div>
+                    </div>
+                    {% endif %}
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Description:</div>
+                        <div class="col-md-8">{{ budget.description|linebreaks }}</div>
+                    </div>
+                    {% if budget.notes %}
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Notes:</div>
+                        <div class="col-md-8">{{ budget.notes|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+                    {% if budget.rejection_reason %}
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Rejection Reason:</div>
+                        <div class="col-md-8 text-danger">{{ budget.rejection_reason }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Budget Status Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Budget Status</h5>
+                </div>
+                <div class="card-body">
+                    {% if budget.status == 'draft' %}
+                    <div class="alert alert-secondary">
+                        <i class="fas fa-pencil-alt me-2"></i>
+                        <strong>Draft Status</strong>
+                        <p class="mb-0 mt-2">This budget is currently in draft status. You can edit or submit it for approval.</p>
+                    </div>
+                    <form method="post" action="{% url 'budget_approval' budget.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="submit">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Submit for Approval
+                        </button>
+                    </form>
+                    {% elif budget.status == 'submitted' %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-clock me-2"></i>
+                        <strong>Pending Approval</strong>
+                        <p class="mb-0 mt-2">This budget has been submitted and is waiting for approval.</p>
+                    </div>
+                    {% if user.is_admin %}
+                    <form method="post" action="{% url 'budget_approval' budget.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="rejection_reason" class="form-label">Rejection Reason (optional):</label>
+                            <textarea name="rejection_reason" id="rejection_reason" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" name="action" value="approve" class="btn btn-success">
+                                <i class="fas fa-check me-2"></i>Approve Budget
+                            </button>
+                            <button type="submit" name="action" value="reject" class="btn btn-danger">
+                                <i class="fas fa-times me-2"></i>Reject Budget
+                            </button>
+                        </div>
+                    </form>
+                    {% endif %}
+                    {% elif budget.status == 'approved' %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Approved</strong>
+                        <p class="mb-0 mt-2">This budget has been approved and is active.</p>
+                    </div>
+                    {% elif budget.status == 'rejected' %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        <strong>Rejected</strong>
+                        <p class="mb-0 mt-2">This budget has been rejected. You can edit and resubmit it.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Budget Allocations Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Budget Allocations</h5>
+                    {% if budget.status == 'approved' %}
+                    <a href="{% url 'budget_allocation_create' %}?budget={{ budget.id }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i> Add
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="card-body p-0">
+                    {% if allocations %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Purpose</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for allocation in allocations %}
+                                <tr>
+                                    <td>{{ allocation.purpose }}</td>
+                                    <td>${{ allocation.amount|floatformat:2 }}</td>
+                                    <td>{{ allocation.allocated_date|date:"M d, Y" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-4 text-center">
+                        <p class="text-muted mb-0">No allocations have been made from this budget yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if allocations %}
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between">
+                        <span>Total Allocated:</span>
+                        <span class="fw-bold">${{ total_allocated|floatformat:2 }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Remaining:</span>
+                        <span class="fw-bold">${{ remaining|floatformat:2 }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

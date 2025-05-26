@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Expense - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="h3 mb-0">Delete Expense</h1>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Confirm Deletion</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> This action cannot be undone. All attachments associated with this expense will also be deleted.
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="fw-bold">Expense Details:</h6>
+                        <div class="row mt-3">
+                            <div class="col-md-4 fw-bold">Title:</div>
+                            <div class="col-md-8">{{ expense.title }}</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-4 fw-bold">Amount:</div>
+                            <div class="col-md-8">${{ expense.amount|floatformat:2 }}</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-4 fw-bold">Category:</div>
+                            <div class="col-md-8">{{ expense.category.name }}</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-4 fw-bold">Date:</div>
+                            <div class="col-md-8">{{ expense.date|date:"F d, Y" }}</div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-4 fw-bold">Status:</div>
+                            <div class="col-md-8">
+                                {% if expense.status == 'draft' %}
+                                <span class="badge bg-secondary">Draft</span>
+                                {% elif expense.status == 'submitted' %}
+                                <span class="badge bg-warning">Submitted</span>
+                                {% elif expense.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                                {% elif expense.status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                                {% elif expense.status == 'paid' %}
+                                <span class="badge bg-info">Paid</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if expense.attachments.count > 0 %}
+                    <div class="alert alert-danger mb-4">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Caution:</strong> This expense has {{ expense.attachments.count }} attachment{{ expense.attachments.count|pluralize }} that will also be deleted.
+                    </div>
+                    {% endif %}
+                    
+                    {% if expense.status == 'approved' or expense.status == 'paid' %}
+                    <div class="alert alert-danger mb-4">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Warning:</strong> This expense has already been {{ expense.status }}. Deleting it may cause accounting discrepancies.
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'expense_detail' expense.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Delete Expense
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,415 @@
+{% extends 'base.html' %}
+
+{% block title %}Budget Dashboard - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="h3 mb-0">Budget Dashboard</h1>
+        </div>
+    </div>
+    
+    <!-- Budget Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow-sm h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Budget (Current Year)
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ total_budget|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow-sm h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Allocated Budget
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ allocated_budget|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow-sm h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending Approval
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ pending_budget|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow-sm h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Remaining Budget
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ remaining_budget|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-wallet fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Charts and Tables -->
+    <div class="row">
+        <!-- Budget Allocation by Category Chart -->
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold">Budget Allocation by Category</h6>
+                    <div class="dropdown no-arrow">
+                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
+                            <li><a class="dropdown-item" href="{% url 'budget_list' %}">View All Budgets</a></li>
+                            <li><a class="dropdown-item" href="{% url 'budget_create' %}">Create New Budget</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie">
+                        <canvas id="budgetCategoryChart" style="height: 300px;"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        {% for category in budget_categories %}
+                        <span class="me-2">
+                            <i class="fas fa-circle" style="color: {{ category.color }}"></i> {{ category.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget vs Expenses Chart -->
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold">Budget vs Expenses (Monthly)</h6>
+                    <div class="dropdown no-arrow">
+                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink2" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink2">
+                            <li><a class="dropdown-item" href="{% url 'expense_list' %}">View All Expenses</a></li>
+                            <li><a class="dropdown-item" href="{% url 'expense_create' %}">Create New Expense</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-bar">
+                        <canvas id="budgetExpensesChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Budgets -->
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold">Recent Budgets</h6>
+                    <a href="{% url 'budget_list' %}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for budget in recent_budgets %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'budget_detail' budget.id %}">{{ budget.title|truncatechars:30 }}</a>
+                                    </td>
+                                    <td>{{ budget.category.name }}</td>
+                                    <td>${{ budget.amount|floatformat:2 }}</td>
+                                    <td>
+                                        {% if budget.status == 'approved' %}
+                                        <span class="badge bg-success">Approved</span>
+                                        {% elif budget.status == 'pending' %}
+                                        <span class="badge bg-warning">Pending</span>
+                                        {% elif budget.status == 'rejected' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No recent budgets found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Budget Allocations -->
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold">Recent Budget Allocations</h6>
+                    <a href="{% url 'budget_allocation_list' %}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Budget</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for allocation in recent_allocations %}
+                                <tr>
+                                    <td>{{ allocation.department.name }}</td>
+                                    <td>
+                                        <a href="{% url 'budget_detail' allocation.budget.id %}">
+                                            {{ allocation.budget.title|truncatechars:30 }}
+                                        </a>
+                                    </td>
+                                    <td>${{ allocation.amount|floatformat:2 }}</td>
+                                    <td>{{ allocation.created_at|date:"M d, Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No recent allocations found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Categories Section -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold">Budget Categories</h6>
+                    <a href="{% url 'budget_category_list' %}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in categories %}
+                                <tr>
+                                    <td>{{ category.name }}</td>
+                                    <td>{{ category.description|truncatechars:50 }}</td>
+                                    <td>
+                                        {% if category.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ category.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'budget_category_update' category.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'budget_category_delete' category.id %}" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No budget categories found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Budget Category Chart
+    var ctx = document.getElementById('budgetCategoryChart').getContext('2d');
+    var budgetCategoryChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: [{% for category in budget_categories %}'{{ category.name }}',{% endfor %}],
+            datasets: [{
+                data: [{% for category in budget_categories %}{{ category.amount }},{% endfor %}],
+                backgroundColor: [{% for category in budget_categories %}'{{ category.color }}',{% endfor %}],
+                hoverBackgroundColor: [{% for category in budget_categories %}'{{ category.color }}',{% endfor %}],
+                hoverBorderColor: "rgba(234, 236, 244, 1)",
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+            },
+            legend: {
+                display: false
+            },
+            cutoutPercentage: 80,
+        },
+    });
+
+    // Budget vs Expenses Chart
+    var ctx2 = document.getElementById('budgetExpensesChart').getContext('2d');
+    var budgetExpensesChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: [{% for month in budget_expense_months %}'{{ month }}',{% endfor %}],
+            datasets: [{
+                label: "Budget",
+                backgroundColor: "#4e73df",
+                hoverBackgroundColor: "#2e59d9",
+                borderColor: "#4e73df",
+                data: [{% for item in budget_expense_data %}{{ item.budget }},{% endfor %}],
+            },
+            {
+                label: "Expenses",
+                backgroundColor: "#e74a3b",
+                hoverBackgroundColor: "#c23321",
+                borderColor: "#e74a3b",
+                data: [{% for item in budget_expense_data %}{{ item.expense }},{% endfor %}],
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 25,
+                    top: 25,
+                    bottom: 0
+                }
+            },
+            scales: {
+                xAxes: [{
+                    gridLines: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 6
+                    },
+                    maxBarThickness: 25,
+                }],
+                yAxes: [{
+                    ticks: {
+                        min: 0,
+                        maxTicksLimit: 5,
+                        padding: 10,
+                        callback: function(value, index, values) {
+                            return '$' + value;
+                        }
+                    },
+                    gridLines: {
+                        color: "rgb(234, 236, 244)",
+                        zeroLineColor: "rgb(234, 236, 244)",
+                        drawBorder: false,
+                        borderDash: [2],
+                        zeroLineBorderDash: [2]
+                    }
+                }],
+            },
+            legend: {
+                display: true
+            },
+            tooltips: {
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+                callbacks: {
+                    label: function(tooltipItem, chart) {
+                        var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                        return datasetLabel + ': $' + tooltipItem.yLabel;
+                    }
+                }
+            },
+        }
+    });
+</script>
+{% endblock %}

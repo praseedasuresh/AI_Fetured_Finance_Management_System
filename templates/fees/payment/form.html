@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="h3 mb-0">{{ title }}</h1>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Fee Payment Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate id="payment-form">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.student.id_for_label }}" class="form-label">Student</label>
+                            {{ form.student.errors }}
+                            <select name="{{ form.student.name }}" id="{{ form.student.id_for_label }}" 
+                                    class="form-select {% if form.student.errors %}is-invalid{% endif %}" required>
+                                <option value="">Select Student</option>
+                                {% for choice in form.student.field.queryset %}
+                                <option value="{{ choice.id }}" {% if form.student.value|stringformat:'s' == choice.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ choice }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.student.help_text %}
+                            <small class="form-text text-muted">{{ form.student.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.student_fee.id_for_label }}" class="form-label">Student Fee</label>
+                            {{ form.student_fee.errors }}
+                            <select name="{{ form.student_fee.name }}" id="{{ form.student_fee.id_for_label }}" 
+                                    class="form-select {% if form.student_fee.errors %}is-invalid{% endif %}">
+                                <option value="">Select Student Fee (Optional)</option>
+                                {% for choice in form.student_fee.field.queryset %}
+                                <option value="{{ choice.id }}" {% if form.student_fee.value|stringformat:'s' == choice.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ choice.fee_structure.name }} - ${{ choice.amount }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.student_fee.help_text %}
+                            <small class="form-text text-muted">{{ form.student_fee.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.academic_year.id_for_label }}" class="form-label">Academic Year</label>
+                            {{ form.academic_year.errors }}
+                            <select name="{{ form.academic_year.name }}" id="{{ form.academic_year.id_for_label }}" 
+                                    class="form-select {% if form.academic_year.errors %}is-invalid{% endif %}" required>
+                                <option value="">Select Academic Year</option>
+                                {% for choice in form.academic_year.field.queryset %}
+                                <option value="{{ choice.id }}" {% if form.academic_year.value|stringformat:'s' == choice.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ choice }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.academic_year.help_text %}
+                            <small class="form-text text-muted">{{ form.academic_year.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.amount.id_for_label }}" class="form-label">Amount</label>
+                            {{ form.amount.errors }}
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" name="{{ form.amount.name }}" id="{{ form.amount.id_for_label }}" 
+                                       class="form-control {% if form.amount.errors %}is-invalid{% endif %}" 
+                                       value="{{ form.amount.value|default:'' }}" required>
+                            </div>
+                            {% if form.amount.help_text %}
+                            <small class="form-text text-muted">{{ form.amount.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.payment_method.id_for_label }}" class="form-label">Payment Method</label>
+                            {{ form.payment_method.errors }}
+                            <select name="{{ form.payment_method.name }}" id="{{ form.payment_method.id_for_label }}" 
+                                    class="form-select {% if form.payment_method.errors %}is-invalid{% endif %}" required>
+                                <option value="">Select Payment Method</option>
+                                {% for value, text in form.payment_method.field.choices %}
+                                <option value="{{ value }}" {% if form.payment_method.value == value %}selected{% endif %}>
+                                    {{ text }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.payment_method.help_text %}
+                            <small class="form-text text-muted">{{ form.payment_method.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.transaction_id.id_for_label }}" class="form-label">Transaction ID</label>
+                            {{ form.transaction_id.errors }}
+                            <input type="text" name="{{ form.transaction_id.name }}" id="{{ form.transaction_id.id_for_label }}" 
+                                   class="form-control {% if form.transaction_id.errors %}is-invalid{% endif %}" 
+                                   value="{{ form.transaction_id.value|default:'' }}">
+                            {% if form.transaction_id.help_text %}
+                            <small class="form-text text-muted">{{ form.transaction_id.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.payment_date.id_for_label }}" class="form-label">Payment Date</label>
+                            {{ form.payment_date.errors }}
+                            <input type="date" name="{{ form.payment_date.name }}" id="{{ form.payment_date.id_for_label }}" 
+                                   class="form-control {% if form.payment_date.errors %}is-invalid{% endif %}" 
+                                   value="{{ form.payment_date.value|date:'Y-m-d'|default:'' }}" required>
+                            {% if form.payment_date.help_text %}
+                            <small class="form-text text-muted">{{ form.payment_date.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                            {{ form.notes.errors }}
+                            <textarea name="{{ form.notes.name }}" id="{{ form.notes.id_for_label }}" 
+                                      class="form-control {% if form.notes.errors %}is-invalid{% endif %}" 
+                                      rows="3">{{ form.notes.value|default:'' }}</textarea>
+                            {% if form.notes.help_text %}
+                            <small class="form-text text-muted">{{ form.notes.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            {{ form.status.errors }}
+                            <input type="checkbox" name="{{ form.status.name }}" id="{{ form.status.id_for_label }}" 
+                                   class="form-check-input {% if form.status.errors %}is-invalid{% endif %}" 
+                                   value="paid" {% if form.status.value == 'paid' %}checked{% endif %}>
+                            <label for="{{ form.status.id_for_label }}" class="form-check-label">Mark as Paid</label>
+                            {% if form.status.help_text %}
+                            <small class="form-text text-muted d-block">{{ form.status.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'fee_payment_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to List
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Payment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the student and student_fee select elements
+        const studentSelect = document.getElementById('{{ form.student.id_for_label }}');
+        const studentFeeSelect = document.getElementById('{{ form.student_fee.id_for_label }}');
+        const amountInput = document.getElementById('{{ form.amount.id_for_label }}');
+        
+        // Add event listener to student select
+        studentSelect.addEventListener('change', function() {
+            const studentId = this.value;
+            
+            // Clear the student fee select
+            studentFeeSelect.innerHTML = '<option value="">Select Student Fee (Optional)</option>';
+            
+            if (studentId) {
+                // Fetch the student fees for the selected student
+                fetch(`/fees/api/student-fees/${studentId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Add the student fees to the select
+                        data.forEach(fee => {
+                            const option = document.createElement('option');
+                            option.value = fee.id;
+                            option.textContent = `${fee.fee_structure_name} - $${fee.amount}`;
+                            option.dataset.amount = fee.amount;
+                            studentFeeSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching student fees:', error));
+            }
+        });
+        
+        // Add event listener to student fee select to update amount
+        studentFeeSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption && selectedOption.dataset.amount) {
+                amountInput.value = selectedOption.dataset.amount;
+            }
+        });
+        
+        // Trigger the change event if a student is already selected (e.g. when editing)
+        if (studentSelect.value) {
+            const event = new Event('change');
+            studentSelect.dispatchEvent(event);
+        }
+    });
+</script>
+{% endblock %}

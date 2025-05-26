@@ -1,0 +1,374 @@
+{% extends 'base.html' %}
+
+{% block title %}Expenses Dashboard - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="h3 mb-0">Expenses Dashboard</h1>
+        </div>
+    </div>
+    
+    <!-- Expense Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow-sm h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Expenses (Current Month)
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ total_expenses_month|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow-sm h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Expenses (Year to Date)
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ total_expenses_year|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow-sm h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending Approval
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ pending_expenses|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow-sm h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Unpaid Expenses
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">${{ unpaid_expenses|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-money-bill-wave fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Charts and Tables -->
+    <div class="row">
+        <!-- Expense by Category Chart -->
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold">Expenses by Category</h6>
+                    <div class="dropdown no-arrow">
+                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
+                            <li><a class="dropdown-item" href="{% url 'expense_list' %}">View All Expenses</a></li>
+                            <li><a class="dropdown-item" href="{% url 'expense_create' %}">Create New Expense</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie">
+                        <canvas id="expenseCategoryChart" style="height: 300px;"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        {% for category in expense_categories %}
+                        <span class="me-2">
+                            <i class="fas fa-circle" style="color: {{ category.color }}"></i> {{ category.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Expenses Chart -->
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold">Monthly Expenses (Last 6 Months)</h6>
+                    <div class="dropdown no-arrow">
+                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink2" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink2">
+                            <li><a class="dropdown-item" href="{% url 'expense_report' %}">View Full Report</a></li>
+                            <li><a class="dropdown-item" href="{% url 'expense_export' %}">Export Data</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-bar">
+                        <canvas id="monthlyExpensesChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Expenses -->
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold">Recent Expenses</h6>
+                    <a href="{% url 'expense_list' %}" class="btn btn-sm btn-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for expense in recent_expenses %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'expense_detail' expense.id %}">{{ expense.title|truncatechars:30 }}</a>
+                                    </td>
+                                    <td>{{ expense.category.name }}</td>
+                                    <td>${{ expense.amount|floatformat:2 }}</td>
+                                    <td>{{ expense.date|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if expense.status == 'draft' %}
+                                        <span class="badge bg-secondary">Draft</span>
+                                        {% elif expense.status == 'submitted' %}
+                                        <span class="badge bg-warning">Submitted</span>
+                                        {% elif expense.status == 'approved' %}
+                                        <span class="badge bg-success">Approved</span>
+                                        {% elif expense.status == 'rejected' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                        {% elif expense.status == 'paid' %}
+                                        <span class="badge bg-info">Paid</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No recent expenses found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Approvals -->
+        <div class="col-xl-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold">Pending Approvals</h6>
+                    {% if pending_approval_count > 0 and perms.expenses.can_approve_expense %}
+                    <a href="{% url 'expense_approval_list' %}" class="btn btn-sm btn-warning">Review All</a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if pending_approvals %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Submitted By</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for expense in pending_approvals %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'expense_detail' expense.id %}">{{ expense.title|truncatechars:30 }}</a>
+                                    </td>
+                                    <td>{{ expense.submitted_by.get_full_name }}</td>
+                                    <td>${{ expense.amount|floatformat:2 }}</td>
+                                    <td>{{ expense.date|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if perms.expenses.can_approve_expense %}
+                                        <a href="{% url 'expense_approve' expense.id %}" class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                        <a href="{% url 'expense_reject' expense.id %}" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                        {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                        <h5>No Pending Approvals</h5>
+                        <p class="text-muted">There are no expenses waiting for approval.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Expense Category Chart
+    var ctx = document.getElementById('expenseCategoryChart').getContext('2d');
+    var expenseCategoryChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: [{% for category in expense_categories %}'{{ category.name }}',{% endfor %}],
+            datasets: [{
+                data: [{% for category in expense_categories %}{{ category.amount }},{% endfor %}],
+                backgroundColor: [{% for category in expense_categories %}'{{ category.color }}',{% endfor %}],
+                hoverBackgroundColor: [{% for category in expense_categories %}'{{ category.color }}',{% endfor %}],
+                hoverBorderColor: "rgba(234, 236, 244, 1)",
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            tooltips: {
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+            },
+            legend: {
+                display: false
+            },
+            cutoutPercentage: 80,
+        },
+    });
+
+    // Monthly Expenses Chart
+    var ctx2 = document.getElementById('monthlyExpensesChart').getContext('2d');
+    var monthlyExpensesChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: [{% for month in monthly_expense_labels %}'{{ month }}',{% endfor %}],
+            datasets: [{
+                label: "Expenses",
+                backgroundColor: "#4e73df",
+                hoverBackgroundColor: "#2e59d9",
+                borderColor: "#4e73df",
+                data: [{% for amount in monthly_expense_data %}{{ amount }},{% endfor %}],
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 25,
+                    top: 25,
+                    bottom: 0
+                }
+            },
+            scales: {
+                xAxes: [{
+                    gridLines: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 6
+                    },
+                    maxBarThickness: 25,
+                }],
+                yAxes: [{
+                    ticks: {
+                        min: 0,
+                        maxTicksLimit: 5,
+                        padding: 10,
+                        callback: function(value, index, values) {
+                            return '$' + value;
+                        }
+                    },
+                    gridLines: {
+                        color: "rgb(234, 236, 244)",
+                        zeroLineColor: "rgb(234, 236, 244)",
+                        drawBorder: false,
+                        borderDash: [2],
+                        zeroLineBorderDash: [2]
+                    }
+                }],
+            },
+            legend: {
+                display: false
+            },
+            tooltips: {
+                titleMarginBottom: 10,
+                titleFontColor: '#6e707e',
+                titleFontSize: 14,
+                backgroundColor: "rgb(255,255,255)",
+                bodyFontColor: "#858796",
+                borderColor: '#dddfeb',
+                borderWidth: 1,
+                xPadding: 15,
+                yPadding: 15,
+                displayColors: false,
+                caretPadding: 10,
+                callbacks: {
+                    label: function(tooltipItem, chart) {
+                        var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                        return datasetLabel + ': $' + tooltipItem.yLabel;
+                    }
+                }
+            },
+        }
+    });
+</script>
+{% endblock %}

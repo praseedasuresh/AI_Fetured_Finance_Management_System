@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="h3 mb-0">{{ title }}</h1>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Student Fee Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.student.id_for_label }}" class="form-label">Student</label>
+                            {{ form.student.errors }}
+                            <select name="{{ form.student.name }}" id="{{ form.student.id_for_label }}" 
+                                    class="form-select {% if form.student.errors %}is-invalid{% endif %}" required>
+                                <option value="">Select Student</option>
+                                {% for choice in form.student.field.queryset %}
+                                <option value="{{ choice.id }}" {% if form.student.value|stringformat:'s' == choice.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ choice }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.student.help_text %}
+                            <small class="form-text text-muted">{{ form.student.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.fee_structure.id_for_label }}" class="form-label">Fee Structure</label>
+                            {{ form.fee_structure.errors }}
+                            <select name="{{ form.fee_structure.name }}" id="{{ form.fee_structure.id_for_label }}" 
+                                    class="form-select {% if form.fee_structure.errors %}is-invalid{% endif %}" required>
+                                <option value="">Select Fee Structure</option>
+                                {% for choice in form.fee_structure.field.queryset %}
+                                <option value="{{ choice.id }}" {% if form.fee_structure.value|stringformat:'s' == choice.id|stringformat:'s' %}selected{% endif %}>
+                                    {{ choice }} - ${{ choice.amount }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.fee_structure.help_text %}
+                            <small class="form-text text-muted">{{ form.fee_structure.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.amount.id_for_label }}" class="form-label">Amount</label>
+                            {{ form.amount.errors }}
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" name="{{ form.amount.name }}" id="{{ form.amount.id_for_label }}" 
+                                       class="form-control {% if form.amount.errors %}is-invalid{% endif %}" 
+                                       value="{{ form.amount.value|default:'' }}" required>
+                            </div>
+                            {% if form.amount.help_text %}
+                            <small class="form-text text-muted">{{ form.amount.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.waiver_amount.id_for_label }}" class="form-label">Waiver Amount</label>
+                            {{ form.waiver_amount.errors }}
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" name="{{ form.waiver_amount.name }}" id="{{ form.waiver_amount.id_for_label }}" 
+                                       class="form-control {% if form.waiver_amount.errors %}is-invalid{% endif %}" 
+                                       value="{{ form.waiver_amount.value|default:'0.00' }}">
+                            </div>
+                            {% if form.waiver_amount.help_text %}
+                            <small class="form-text text-muted">{{ form.waiver_amount.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.due_date.id_for_label }}" class="form-label">Due Date</label>
+                            {{ form.due_date.errors }}
+                            <input type="date" name="{{ form.due_date.name }}" id="{{ form.due_date.id_for_label }}" 
+                                   class="form-control {% if form.due_date.errors %}is-invalid{% endif %}" 
+                                   value="{{ form.due_date.value|date:'Y-m-d'|default:'' }}" required>
+                            {% if form.due_date.help_text %}
+                            <small class="form-text text-muted">{{ form.due_date.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                            {{ form.description.errors }}
+                            <textarea name="{{ form.description.name }}" id="{{ form.description.id_for_label }}" 
+                                      class="form-control {% if form.description.errors %}is-invalid{% endif %}" 
+                                      rows="3">{{ form.description.value|default:'' }}</textarea>
+                            {% if form.description.help_text %}
+                            <small class="form-text text-muted">{{ form.description.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            {{ form.is_paid.errors }}
+                            <input type="checkbox" name="{{ form.is_paid.name }}" id="{{ form.is_paid.id_for_label }}" 
+                                   class="form-check-input {% if form.is_paid.errors %}is-invalid{% endif %}" 
+                                   {% if form.is_paid.value %}checked{% endif %}>
+                            <label for="{{ form.is_paid.id_for_label }}" class="form-check-label">Mark as Paid</label>
+                            {% if form.is_paid.help_text %}
+                            <small class="form-text text-muted d-block">{{ form.is_paid.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'student_fee_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to List
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Student Fee
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

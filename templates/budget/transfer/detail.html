@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Transfer Details - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12 d-flex justify-content-between align-items-center">
+            <h2>Budget Transfer Details</h2>
+            <a href="{% url 'budget_transfer_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Transfers
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Transfer Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Transfer Date</h6>
+                            <p>{{ transfer.created_at|date:"F d, Y H:i" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold">Transferred By</h6>
+                            <p>{{ transfer.created_by.get_full_name }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h6 class="fw-bold">Transfer Amount</h6>
+                            <p class="text-primary fs-4 fw-bold">${{ transfer.amount|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h6 class="fw-bold">Reason for Transfer</h6>
+                            <p>{{ transfer.reason|linebreaks }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-header bg-danger text-white">
+                                    <h6 class="mb-0">Source Budget</h6>
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="fw-bold">Department</h6>
+                                    <p>{{ transfer.source_budget.department.name }}</p>
+                                    
+                                    <h6 class="fw-bold">Category</h6>
+                                    <p>{{ transfer.source_budget.category.name }}</p>
+                                    
+                                    <h6 class="fw-bold">Academic Year</h6>
+                                    <p>{{ transfer.source_budget.academic_year.name }}</p>
+                                    
+                                    <h6 class="fw-bold">Budget Amount</h6>
+                                    <p>${{ transfer.source_budget.amount|floatformat:2 }}</p>
+                                    
+                                    <a href="{% url 'budget_detail' transfer.source_budget.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye me-1"></i> View Budget
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0">Destination Budget</h6>
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="fw-bold">Department</h6>
+                                    <p>{{ transfer.destination_budget.department.name }}</p>
+                                    
+                                    <h6 class="fw-bold">Category</h6>
+                                    <p>{{ transfer.destination_budget.category.name }}</p>
+                                    
+                                    <h6 class="fw-bold">Academic Year</h6>
+                                    <p>{{ transfer.destination_budget.academic_year.name }}</p>
+                                    
+                                    <h6 class="fw-bold">Budget Amount</h6>
+                                    <p>${{ transfer.destination_budget.amount|floatformat:2 }}</p>
+                                    
+                                    <a href="{% url 'budget_detail' transfer.destination_budget.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye me-1"></i> View Budget
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if related_transfers %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Related Transfers</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Amount</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rel_transfer in related_transfers %}
+                                <tr {% if rel_transfer.id == transfer.id %}class="table-primary"{% endif %}>
+                                    <td>{{ rel_transfer.created_at|date:"M d, Y" }}</td>
+                                    <td>{{ rel_transfer.source_budget.department.name }} - {{ rel_transfer.source_budget.category.name }}</td>
+                                    <td>{{ rel_transfer.destination_budget.department.name }} - {{ rel_transfer.destination_budget.category.name }}</td>
+                                    <td>${{ rel_transfer.amount|floatformat:2 }}</td>
+                                    <td>
+                                        <a href="{% url 'budget_transfer_detail' rel_transfer.id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

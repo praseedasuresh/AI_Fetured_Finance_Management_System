@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+
+{% block title %}Bulk Import Expenses - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12 d-flex justify-content-between align-items-center">
+            <h2>Bulk Import Expenses</h2>
+            <a href="{% url 'expense_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Expenses
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Import Form -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Import Expenses</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if messages %}
+                        <div class="alert {% if success %}alert-success{% else %}alert-danger{% endif %}">
+                            {% for message in messages %}
+                            <p>{{ message }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.file.id_for_label }}" class="form-label">Import File</label>
+                            {{ form.file }}
+                            {% if form.file.errors %}
+                            <div class="text-danger">{{ form.file.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">Upload a CSV or Excel file with expense data</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.default_category.id_for_label }}" class="form-label">Default Category</label>
+                            {{ form.default_category }}
+                            {% if form.default_category.errors %}
+                            <div class="text-danger">{{ form.default_category.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">Used if category is not specified in the file</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.default_budget.id_for_label }}" class="form-label">Default Budget</label>
+                            {{ form.default_budget }}
+                            {% if form.default_budget.errors %}
+                            <div class="text-danger">{{ form.default_budget.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">Used if budget is not specified in the file</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.update_existing }}
+                                <label class="form-check-label" for="{{ form.update_existing.id_for_label }}">
+                                    Update Existing Expenses
+                                </label>
+                                {% if form.update_existing.errors %}
+                                <div class="text-danger">{{ form.update_existing.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">If checked, existing expenses will be updated based on matching ID or title and date</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.skip_errors }}
+                                <label class="form-check-label" for="{{ form.skip_errors.id_for_label }}">
+                                    Skip Errors
+                                </label>
+                                {% if form.skip_errors.errors %}
+                                <div class="text-danger">{{ form.skip_errors.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">If checked, rows with errors will be skipped instead of aborting the entire import</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.submit_for_approval }}
+                                <label class="form-check-label" for="{{ form.submit_for_approval.id_for_label }}">
+                                    Submit for Approval
+                                </label>
+                                {% if form.submit_for_approval.errors %}
+                                <div class="text-danger">{{ form.submit_for_approval.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">If checked, all imported expenses will be automatically submitted for approval</div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload me-1"></i> Upload and Import
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Import Results -->
+            {% if import_results %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Import Results</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success">
+                        <h6 class="fw-bold">Import Summary</h6>
+                        <p>
+                            <strong>Total Rows:</strong> {{ import_results.total_rows }}<br>
+                            <strong>Successfully Imported:</strong> {{ import_results.success_count }}<br>
+                            <strong>Errors:</strong> {{ import_results.error_count }}<br>
+                            <strong>Updated:</strong> {{ import_results.updated_count }}<br>
+                            <strong>Created:</strong> {{ import_results.created_count }}
+                        </p>
+                    </div>
+                    
+                    {% if import_results.errors %}
+                    <div class="alert alert-danger">
+                        <h6 class="fw-bold">Errors</h6>
+                        <ul>
+                            {% for error in import_results.errors %}
+                            <li>Row {{ error.row }}: {{ error.message }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    {% if import_results.imported_expenses %}
+                    <h6 class="fw-bold mb-3">Imported Expenses</h6>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Date</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for expense in import_results.imported_expenses %}
+                                <tr>
+                                    <td>{{ expense.title }}</td>
+                                    <td>{{ expense.date|date:"M d, Y" }}</td>
+                                    <td>
+                                        <span class="badge" style="background-color: {{ expense.category.color }}">
+                                            {{ expense.category.name }}
+                                        </span>
+                                    </td>
+                                    <td>${{ expense.amount|floatformat:2 }}</td>
+                                    <td>
+                                        {% if expense.status == 'draft' %}
+                                        <span class="badge bg-secondary">Draft</span>
+                                        {% elif expense.status == 'submitted' %}
+                                        <span class="badge bg-warning">Submitted</span>
+                                        {% elif expense.status == 'approved' %}
+                                        <span class="badge bg-success">Approved</span>
+                                        {% elif expense.status == 'rejected' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                        {% elif expense.status == 'paid' %}
+                                        <span class="badge bg-info">Paid</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'expense_detail' expense.id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Instructions -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Import Instructions</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="fw-bold">File Format</h6>
+                    <p>Your CSV or Excel file should include the following columns:</p>
+                    <ul>
+                        <li><strong>title</strong> (required): Expense title</li>
+                        <li><strong>date</strong> (required): Date in YYYY-MM-DD format</li>
+                        <li><strong>amount</strong> (required): Expense amount</li>
+                        <li><strong>category</strong> (optional): Category name</li>
+                        <li><strong>budget</strong> (optional): Budget name or ID</li>
+                        <li><strong>payment_method</strong> (optional): Payment method (cash, check, credit_card, bank_transfer, other)</li>
+                        <li><strong>description</strong> (optional): Expense description</li>
+                    </ul>
+                    
+                    <h6 class="fw-bold mt-4">Example</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>title</th>
+                                    <th>date</th>
+                                    <th>amount</th>
+                                    <th>category</th>
+                                    <th>description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Office Supplies</td>
+                                    <td>2025-05-15</td>
+                                    <td>125.50</td>
+                                    <td>Supplies</td>
+                                    <td>Paper, pens, and folders</td>
+                                </tr>
+                                <tr>
+                                    <td>Team Lunch</td>
+                                    <td>2025-05-16</td>
+                                    <td>85.75</td>
+                                    <td>Meals</td>
+                                    <td>Lunch with development team</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h6 class="fw-bold mt-4">Download Template</h6>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'expense_import_template' %}?format=csv" class="btn btn-outline-primary">
+                            <i class="fas fa-file-csv me-1"></i> Download CSV Template
+                        </a>
+                        <a href="{% url 'expense_import_template' %}?format=xlsx" class="btn btn-outline-success">
+                            <i class="fas fa-file-excel me-1"></i> Download Excel Template
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tips -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Tips</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li>Make sure your date format is YYYY-MM-DD</li>
+                        <li>Category names must match existing categories exactly</li>
+                        <li>For budget, you can use either the budget name or ID</li>
+                        <li>To update existing expenses, include an 'id' column with the expense ID</li>
+                        <li>Large files may take some time to process</li>
+                        <li>Maximum file size is 5MB</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

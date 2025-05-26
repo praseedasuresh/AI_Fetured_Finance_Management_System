@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+
+{% block title %}Budget Transfer - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Budget Transfer</h2>
+            <hr>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Transfer Funds Between Budgets</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="transferForm">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.from_budget.id_for_label }}" class="form-label">Source Budget</label>
+                                <select name="{{ form.from_budget.name }}" id="{{ form.from_budget.id_for_label }}" class="form-select {% if form.from_budget.errors %}is-invalid{% endif %}">
+                                    <option value="">Select Source Budget</option>
+                                    {% for budget in form.from_budget.field.queryset %}
+                                    <option value="{{ budget.id }}" {% if form.from_budget.value|stringformat:'s' == budget.id|stringformat:'s' %}selected{% endif %}>
+                                        {{ budget.title }} ({{ budget.department.name }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.from_budget.errors %}
+                                <div class="text-danger">{{ form.from_budget.errors }}</div>
+                                {% endif %}
+                                <div id="sourceBudgetInfo" class="form-text mt-2"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.to_budget.id_for_label }}" class="form-label">Destination Budget</label>
+                                <select name="{{ form.to_budget.name }}" id="{{ form.to_budget.id_for_label }}" class="form-select {% if form.to_budget.errors %}is-invalid{% endif %}">
+                                    <option value="">Select Destination Budget</option>
+                                    {% for budget in form.to_budget.field.queryset %}
+                                    <option value="{{ budget.id }}" {% if form.to_budget.value|stringformat:'s' == budget.id|stringformat:'s' %}selected{% endif %}>
+                                        {{ budget.title }} ({{ budget.department.name }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.to_budget.errors %}
+                                <div class="text-danger">{{ form.to_budget.errors }}</div>
+                                {% endif %}
+                                <div id="destBudgetInfo" class="form-text mt-2"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.amount.id_for_label }}" class="form-label">Transfer Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" name="{{ form.amount.name }}" id="{{ form.amount.id_for_label }}" 
+                                       class="form-control {% if form.amount.errors %}is-invalid{% endif %}" 
+                                       value="{{ form.amount.value|default:'' }}" step="0.01" min="0.01" required>
+                            </div>
+                            {% if form.amount.errors %}
+                            <div class="text-danger">{{ form.amount.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">The amount must not exceed the available balance in the source budget.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.reason.id_for_label }}" class="form-label">Reason for Transfer</label>
+                            <textarea name="{{ form.reason.name }}" id="{{ form.reason.id_for_label }}" 
+                                     class="form-control {% if form.reason.errors %}is-invalid{% endif %}" 
+                                     rows="3" required>{{ form.reason.value|default:'' }}</textarea>
+                            {% if form.reason.errors %}
+                            <div class="text-danger">{{ form.reason.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'budget_transfer_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Back to Budgets
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-exchange-alt me-1"></i> Transfer Funds
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sourceBudgetSelect = document.getElementById('{{ form.from_budget.id_for_label }}');
+        const destBudgetSelect = document.getElementById('{{ form.to_budget.id_for_label }}');
+        const sourceBudgetInfo = document.getElementById('sourceBudgetInfo');
+        const destBudgetInfo = document.getElementById('destBudgetInfo');
+        
+        // Budget data from server (this should be populated by the view)
+        const budgetData = {};
+        
+        // Fetch budget details when a budget is selected
+        function fetchBudgetDetails(budgetId, targetElement) {
+            if (!budgetId) {
+                targetElement.innerHTML = '';
+                return;
+            }
+            
+            fetch(`/budget/api/budget/${budgetId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    targetElement.innerHTML = `
+                        <div class="alert alert-info py-2 px-3 mt-2 mb-0">
+                            <strong>Total:</strong> $${data.amount.toFixed(2)} | 
+                            <strong>Available:</strong> $${data.available.toFixed(2)}
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error fetching budget details:', error);
+                    targetElement.innerHTML = '<div class="text-danger">Error loading budget information</div>';
+                });
+        }
+        
+        // Update budget info displays
+        function updateBudgetInfo() {
+            const sourceId = sourceBudgetSelect.value;
+            const destId = destBudgetSelect.value;
+            
+            if (sourceId) {
+                fetchBudgetDetails(sourceId, sourceBudgetInfo);
+            } else {
+                sourceBudgetInfo.innerHTML = '';
+            }
+            
+            if (destId) {
+                fetchBudgetDetails(destId, destBudgetInfo);
+            } else {
+                destBudgetInfo.innerHTML = '';
+            }
+        }
+        
+        // Add event listeners
+        if (sourceBudgetSelect) {
+            sourceBudgetSelect.addEventListener('change', updateBudgetInfo);
+        }
+        
+        if (destBudgetSelect) {
+            destBudgetSelect.addEventListener('change', updateBudgetInfo);
+        }
+        
+        // Initial update
+        updateBudgetInfo();
+    });
+</script>
+{% endblock %}

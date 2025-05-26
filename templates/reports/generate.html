@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Generate Report - Finance Management System{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="fas fa-file-alt me-2"></i>Generate Report</h2>
+        <p class="text-muted">Create a new report based on your selected parameters</p>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'report_dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" id="reportGenerationForm">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-3">Report Template</h5>
+                    {{ form.template|as_crispy_field }}
+                    
+                    <div class="template-info alert alert-info d-none">
+                        <h6 class="template-title"></h6>
+                        <p class="template-description"></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="mb-3">Time Period</h5>
+                    {{ form.academic_year|as_crispy_field }}
+                    {{ form.start_date|as_crispy_field }}
+                    {{ form.end_date|as_crispy_field }}
+                </div>
+            </div>
+            
+            <hr>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-3">Filters</h5>
+                    {{ form.department|as_crispy_field }}
+                    {{ form.include_details|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    <h5 class="mb-3">Output Format</h5>
+                    {{ form.format|as_crispy_field }}
+                    
+                    <div class="alert alert-secondary">
+                        <h6>Format Information:</h6>
+                        <ul class="mb-0">
+                            <li><strong>PDF:</strong> Best for printing and formal distribution</li>
+                            <li><strong>Excel:</strong> Allows further data analysis and manipulation</li>
+                            <li><strong>CSV:</strong> Simple format for data import into other systems</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-file-download me-1"></i> Generate Report
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize date pickers
+        flatpickr("#id_start_date", {
+            dateFormat: "Y-m-d",
+        });
+        
+        flatpickr("#id_end_date", {
+            dateFormat: "Y-m-d",
+        });
+        
+        // Initialize select2 for dropdown fields
+        $('#id_template, #id_academic_year, #id_department').select2({
+            theme: 'bootstrap-5',
+            width: '100%'
+        });
+        
+        // Handle template change to show template info
+        $('#id_template').on('change', function() {
+            const templateId = $(this).val();
+            const templateText = $('#id_template option:selected').text();
+            
+            if (templateId) {
+                // In a real implementation, you would fetch the template details via AJAX
+                // For now, just show the selected template name
+                $('.template-info').removeClass('d-none');
+                $('.template-title').text(templateText);
+                $('.template-description').text('Selected template for report generation.');
+            } else {
+                $('.template-info').addClass('d-none');
+            }
+        });
+        
+        // Handle academic year change to suggest date range
+        $('#id_academic_year').on('change', function() {
+            // In a real implementation, you would fetch the academic year date range via AJAX
+            // and update the start_date and end_date fields accordingly
+            console.log('Academic year changed');
+        });
+    });
+</script>
+{% endblock %}

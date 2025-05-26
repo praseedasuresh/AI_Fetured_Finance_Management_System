@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+
+{% block title %}Recurring Expense Details - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12 d-flex justify-content-between align-items-center">
+            <h2>Recurring Expense Details</h2>
+            <div>
+                <a href="{% url 'recurring_expense_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Recurring Expenses
+                </a>
+                <a href="{% url 'recurring_expense_update' recurring_expense.id %}" class="btn btn-primary">
+                    <i class="fas fa-edit me-1"></i> Edit
+                </a>
+                <a href="{% url 'recurring_expense_delete' recurring_expense.id %}" class="btn btn-danger">
+                    <i class="fas fa-trash me-1"></i> Delete
+                </a>
+                {% if recurring_expense.is_active %}
+                <a href="{% url 'recurring_expense_toggle' recurring_expense.id %}?action=deactivate" class="btn btn-warning">
+                    <i class="fas fa-pause me-1"></i> Pause
+                </a>
+                {% else %}
+                <a href="{% url 'recurring_expense_toggle' recurring_expense.id %}?action=activate" class="btn btn-success">
+                    <i class="fas fa-play me-1"></i> Activate
+                </a>
+                {% endif %}
+                <a href="{% url 'recurring_expense_generate' recurring_expense.id %}" class="btn btn-info">
+                    <i class="fas fa-sync me-1"></i> Generate Now
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Recurring Expense Information -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3 bg-primary text-white">
+                    <h6 class="m-0 font-weight-bold">Recurring Expense Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <h6 class="fw-bold">Title</h6>
+                            <p>{{ recurring_expense.title }}</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <h6 class="fw-bold">Status</h6>
+                            <p>
+                                {% if recurring_expense.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">Category</h6>
+                            <p>
+                                <span class="badge" style="background-color: {{ recurring_expense.category.color }}">
+                                    {{ recurring_expense.category.name }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">Amount</h6>
+                            <p class="text-primary fw-bold">${{ recurring_expense.amount|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">Frequency</h6>
+                            <p>{{ recurring_expense.get_frequency_display }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">Next Due Date</h6>
+                            <p>{{ recurring_expense.next_due_date|date:"F d, Y" }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">Start Date</h6>
+                            <p>{{ recurring_expense.start_date|date:"F d, Y" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">End Date</h6>
+                            <p>{{ recurring_expense.end_date|date:"F d, Y"|default:"No end date" }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">Budget</h6>
+                            <p>
+                                {% if recurring_expense.budget %}
+                                <a href="{% url 'budget_detail' recurring_expense.budget.id %}">
+                                    {{ recurring_expense.budget.category.name }} - {{ recurring_expense.budget.department.name }}
+                                </a>
+                                {% else %}
+                                <span class="text-muted">No budget assigned</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">Payment Method</h6>
+                            <p>{{ recurring_expense.get_payment_method_display }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">Auto Submit</h6>
+                            <p>
+                                {% if recurring_expense.auto_submit %}
+                                <span class="badge bg-success">Yes</span>
+                                {% else %}
+                                <span class="badge bg-secondary">No</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">Created By</h6>
+                            <p>{{ recurring_expense.created_by.get_full_name }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">Created At</h6>
+                            <p>{{ recurring_expense.created_at|date:"F d, Y H:i" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="fw-bold">Last Updated</h6>
+                            <p>{{ recurring_expense.updated_at|date:"F d, Y H:i" }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="fw-bold">Description</h6>
+                            <p>{{ recurring_expense.description|linebreaks }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generated Expenses -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3 bg-info text-white d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold">Generated Expenses</h6>
+                    <a href="{% url 'expense_list' %}?recurring_expense={{ recurring_expense.id }}" class="btn btn-sm btn-light">
+                        <i class="fas fa-external-link-alt me-1"></i> View All
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if generated_expenses %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for expense in generated_expenses %}
+                                <tr>
+                                    <td>{{ expense.date|date:"M d, Y" }}</td>
+                                    <td>${{ expense.amount|floatformat:2 }}</td>
+                                    <td>
+                                        {% if expense.status == 'draft' %}
+                                        <span class="badge bg-secondary">Draft</span>
+                                        {% elif expense.status == 'submitted' %}
+                                        <span class="badge bg-warning">Submitted</span>
+                                        {% elif expense.status == 'approved' %}
+                                        <span class="badge bg-success">Approved</span>
+                                        {% elif expense.status == 'rejected' %}
+                                        <span class="badge bg-danger">Rejected</span>
+                                        {% elif expense.status == 'paid' %}
+                                        <span class="badge bg-info">Paid</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'expense_detail' expense.id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">No expenses have been generated yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Status Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3 bg-primary text-white">
+                    <h6 class="m-0 font-weight-bold">Status</h6>
+                </div>
+                <div class="card-body text-center">
+                    {% if recurring_expense.is_active %}
+                    <div>
+                        <i class="fas fa-play-circle fa-4x text-success mb-3"></i>
+                        <h5>Active</h5>
+                        <p class="text-muted">This recurring expense is active and will generate expenses according to its schedule.</p>
+                        <a href="{% url 'recurring_expense_toggle' recurring_expense.id %}?action=deactivate" class="btn btn-warning">
+                            <i class="fas fa-pause me-1"></i> Pause
+                        </a>
+                    </div>
+                    {% else %}
+                    <div>
+                        <i class="fas fa-pause-circle fa-4x text-secondary mb-3"></i>
+                        <h5>Inactive</h5>
+                        <p class="text-muted">This recurring expense is paused and will not generate new expenses.</p>
+                        <a href="{% url 'recurring_expense_toggle' recurring_expense.id %}?action=activate" class="btn btn-success">
+                            <i class="fas fa-play me-1"></i> Activate
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3 bg-info text-white">
+                    <h6 class="m-0 font-weight-bold">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'recurring_expense_generate' recurring_expense.id %}" class="btn btn-primary">
+                            <i class="fas fa-sync me-1"></i> Generate Expense Now
+                        </a>
+                        <a href="{% url 'recurring_expense_update' recurring_expense.id %}" class="btn btn-secondary">
+                            <i class="fas fa-edit me-1"></i> Edit Recurring Expense
+                        </a>
+                        <a href="{% url 'expense_list' %}?recurring_expense={{ recurring_expense.id }}" class="btn btn-info">
+                            <i class="fas fa-list me-1"></i> View All Generated Expenses
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3 bg-primary text-white">
+                    <h6 class="m-0 font-weight-bold">Statistics</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <h6 class="fw-bold">Total Generated</h6>
+                            <p>{{ stats.total_generated }}</p>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h6 class="fw-bold">Total Amount</h6>
+                            <p>${{ stats.total_amount|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <h6 class="fw-bold">Approved</h6>
+                            <p>{{ stats.approved }}</p>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h6 class="fw-bold">Paid</h6>
+                            <p>{{ stats.paid }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <h6 class="fw-bold">Rejected</h6>
+                            <p>{{ stats.rejected }}</p>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h6 class="fw-bold">Pending</h6>
+                            <p>{{ stats.pending }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="fw-bold">Monthly Cost</h6>
+                            <p>${{ stats.monthly_cost|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

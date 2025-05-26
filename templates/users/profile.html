@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-user-circle me-2"></i>My Profile</h2>
+                <a href="{% url 'password_change' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-key me-1"></i> Change Password
+                </a>
+            </div>
+            <hr>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">User Information</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" alt="{{ user.get_full_name }}" class="rounded-circle img-thumbnail mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 150px; height: 150px;">
+                        <i class="fas fa-user fa-5x text-secondary"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <h4>{{ user.get_full_name }}</h4>
+                    <p class="text-muted">{{ user.email }}</p>
+                    
+                    <div class="badge bg-primary mb-3">{{ user.get_role_display }}</div>
+                    
+                    {% if user.department %}
+                    <p><strong>Department:</strong> {{ user.department.name }}</p>
+                    {% endif %}
+                    
+                    {% if user.is_student %}
+                    <div class="alert alert-info">
+                        <p class="mb-0"><strong>Student ID:</strong> {{ user.student_id }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if user.phone_number %}
+                    <p><strong>Phone:</strong> {{ user.phone_number }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Edit Profile</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    {{ user_form.first_name }}
+                                    <label for="{{ user_form.first_name.id_for_label }}">First Name</label>
+                                    {% if user_form.first_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ user_form.first_name.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    {{ user_form.last_name }}
+                                    <label for="{{ user_form.last_name.id_for_label }}">Last Name</label>
+                                    {% if user_form.last_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ user_form.last_name.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            {{ user_form.email }}
+                            <label for="{{ user_form.email.id_for_label }}">Email Address</label>
+                            {% if user_form.email.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ user_form.email.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    {{ user_form.phone_number }}
+                                    <label for="{{ user_form.phone_number.id_for_label }}">Phone Number</label>
+                                    {% if user_form.phone_number.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ user_form.phone_number.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    {{ user_form.gender }}
+                                    <label for="{{ user_form.gender.id_for_label }}">Gender</label>
+                                    {% if user_form.gender.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ user_form.gender.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    {{ user_form.date_of_birth }}
+                                    <label for="{{ user_form.date_of_birth.id_for_label }}">Date of Birth</label>
+                                    {% if user_form.date_of_birth.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ user_form.date_of_birth.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    {{ user_form.department }}
+                                    <label for="{{ user_form.department.id_for_label }}">Department</label>
+                                    {% if user_form.department.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ user_form.department.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ user_form.address.id_for_label }}" class="form-label">Address</label>
+                            {{ user_form.address }}
+                            {% if user_form.address.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ user_form.address.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ user_form.profile_picture.id_for_label }}" class="form-label">Profile Picture</label>
+                            {{ user_form.profile_picture }}
+                            {% if user_form.profile_picture.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ user_form.profile_picture.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if user.is_student and profile_form %}
+                        <hr>
+                        <h5 class="mb-3">Student Information</h5>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    {{ profile_form.program }}
+                                    <label for="{{ profile_form.program.id_for_label }}">Program</label>
+                                    {% if profile_form.program.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ profile_form.program.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    {{ profile_form.current_semester }}
+                                    <label for="{{ profile_form.current_semester.id_for_label }}">Current Semester</label>
+                                    {% if profile_form.current_semester.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ profile_form.current_semester.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    {{ profile_form.batch }}
+                                    <label for="{{ profile_form.batch.id_for_label }}">Batch</label>
+                                    {% if profile_form.batch.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ profile_form.batch.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    {{ profile_form.guardian_name }}
+                                    <label for="{{ profile_form.guardian_name.id_for_label }}">Guardian Name</label>
+                                    {% if profile_form.guardian_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ profile_form.guardian_name.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            {{ profile_form.guardian_contact }}
+                            <label for="{{ profile_form.guardian_contact.id_for_label }}">Guardian Contact</label>
+                            {% if profile_form.guardian_contact.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ profile_form.guardian_contact.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

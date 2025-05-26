@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0 text-gray-800">{{ title }}</h1>
+            <p class="mb-0">Generate AI-powered budget predictions based on historical data</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'budget_prediction_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Predictions
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Main Form Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Prediction Parameters</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="prediction-form">
+                        {% csrf_token %}
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> The AI prediction engine will analyze historical budget data, expense patterns, and department growth to predict an optimal budget allocation.
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.department.id_for_label }}" class="form-label">Department</label>
+                                {{ form.department }}
+                                {% if form.department.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.department.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.academic_year.id_for_label }}" class="form-label">Academic Year</label>
+                                {{ form.academic_year }}
+                                {% if form.academic_year.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.academic_year.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.category.id_for_label }}" class="form-label">Budget Category</label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.category.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6 class="m-0 font-weight-bold">Data Sources for Prediction</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-2">
+                                    {{ form.include_previous_years }}
+                                    <label class="form-check-label" for="{{ form.include_previous_years.id_for_label }}">
+                                        Include Previous Years' Data
+                                    </label>
+                                    <small class="form-text text-muted d-block">{{ form.include_previous_years.help_text }}</small>
+                                </div>
+                                
+                                <div class="form-check mb-2">
+                                    {{ form.include_expense_trends }}
+                                    <label class="form-check-label" for="{{ form.include_expense_trends.id_for_label }}">
+                                        Include Expense Trends
+                                    </label>
+                                    <small class="form-text text-muted d-block">{{ form.include_expense_trends.help_text }}</small>
+                                </div>
+                                
+                                <div class="form-check">
+                                    {{ form.include_department_growth }}
+                                    <label class="form-check-label" for="{{ form.include_department_growth.id_for_label }}">
+                                        Include Department Growth
+                                    </label>
+                                    <small class="form-text text-muted d-block">{{ form.include_department_growth.help_text }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-robot me-1"></i> Generate Prediction
+                            </button>
+                            <a href="{% url 'budget_prediction_list' %}" class="btn btn-outline-secondary ms-2">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Info Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">About AI Budget Predictions</h6>
+                </div>
+                <div class="card-body">
+                    <p>The AI prediction engine uses several data sources to generate accurate budget predictions:</p>
+                    
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold"><i class="fas fa-history me-2"></i> Historical Data</h6>
+                        <p class="small">Analyzes past budget allocations and their utilization to identify patterns and trends over time.</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold"><i class="fas fa-chart-line me-2"></i> Expense Trends</h6>
+                        <p class="small">Examines recent expense patterns to project future spending needs and adjust budget recommendations accordingly.</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold"><i class="fas fa-chart-bar me-2"></i> Department Growth</h6>
+                        <p class="small">Considers department expansion, student enrollment changes, and other growth factors that impact budget requirements.</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold"><i class="fas fa-percentage me-2"></i> Inflation Adjustment</h6>
+                        <p class="small">Automatically applies inflation adjustments to ensure budgets keep pace with rising costs.</p>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Predictions are provided with a confidence score. Lower confidence scores indicate limited historical data or unusual patterns.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Add loading state to form submission
+        $('#prediction-form').on('submit', function() {
+            $(this).find('button[type="submit"]').html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Generating Prediction...').prop('disabled', true);
+        });
+    });
+</script>
+{% endblock %}

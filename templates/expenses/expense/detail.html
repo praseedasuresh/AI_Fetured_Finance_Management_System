@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block title %}Expense Details - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12 d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0">Expense Details</h1>
+            <div>
+                {% if expense.status == 'draft' or expense.status == 'rejected' %}
+                <a href="{% url 'expense_update' expense.id %}" class="btn btn-primary me-2">
+                    <i class="fas fa-edit me-2"></i>Edit
+                </a>
+                {% endif %}
+                
+                {% if expense.status == 'draft' %}
+                <a href="{% url 'expense_submit' expense.id %}" class="btn btn-warning me-2">
+                    <i class="fas fa-paper-plane me-2"></i>Submit
+                </a>
+                {% endif %}
+                
+                {% if expense.status == 'submitted' and perms.expenses.can_approve_expense %}
+                <a href="{% url 'expense_approve' expense.id %}" class="btn btn-success me-2">
+                    <i class="fas fa-check-circle me-2"></i>Approve
+                </a>
+                <a href="{% url 'expense_reject' expense.id %}" class="btn btn-danger me-2">
+                    <i class="fas fa-times-circle me-2"></i>Reject
+                </a>
+                {% endif %}
+                
+                {% if expense.status == 'approved' and perms.expenses.can_process_payment %}
+                <a href="{% url 'expense_payment' expense.id %}" class="btn btn-info me-2">
+                    <i class="fas fa-money-bill-wave me-2"></i>Process Payment
+                </a>
+                {% endif %}
+                
+                {% if perms.expenses.delete_expense %}
+                <a href="{% url 'expense_delete' expense.id %}" class="btn btn-outline-danger">
+                    <i class="fas fa-trash me-2"></i>Delete
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Expense Details -->
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Expense Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Title:</div>
+                        <div class="col-md-8">{{ expense.title }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Amount:</div>
+                        <div class="col-md-8">${{ expense.amount|floatformat:2 }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Category:</div>
+                        <div class="col-md-8">{{ expense.category.name }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Date:</div>
+                        <div class="col-md-8">{{ expense.date|date:"F d, Y" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Payment Method:</div>
+                        <div class="col-md-8">{{ expense.get_payment_method_display|default:"Not specified" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Vendor/Payee:</div>
+                        <div class="col-md-8">{{ expense.vendor|default:"Not specified" }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Description:</div>
+                        <div class="col-md-8">{{ expense.description|linebreaks }}</div>
+                    </div>
+                    {% if expense.notes %}
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Notes:</div>
+                        <div class="col-md-8">{{ expense.notes|linebreaks }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Attachments -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Attachments</h5>
+                </div>
+                <div class="card-body">
+                    {% if expense.attachments.all %}
+                    <div class="list-group">
+                        {% for attachment in expense.attachments.all %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-file me-2"></i>
+                                <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.filename }}</a>
+                                <small class="text-muted ms-2">({{ attachment.file_size|filesizeformat }})</small>
+                            </div>
+                            <div>
+                                <a href="{{ attachment.file.url }}" class="btn btn-sm btn-outline-primary" download>
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">No attachments for this expense</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status and History -->
+        <div class="col-md-4">
+            <!-- Status Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        {% if expense.status == 'draft' %}
+                        <span class="badge bg-secondary fs-5 p-2 w-100">Draft</span>
+                        {% elif expense.status == 'submitted' %}
+                        <span class="badge bg-warning fs-5 p-2 w-100">Submitted</span>
+                        {% elif expense.status == 'approved' %}
+                        <span class="badge bg-success fs-5 p-2 w-100">Approved</span>
+                        {% elif expense.status == 'rejected' %}
+                        <span class="badge bg-danger fs-5 p-2 w-100">Rejected</span>
+                        {% elif expense.status == 'paid' %}
+                        <span class="badge bg-info fs-5 p-2 w-100">Paid</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-md-5 fw-bold">Submitted By:</div>
+                        <div class="col-md-7">{{ expense.submitted_by.get_full_name }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-5 fw-bold">Submitted On:</div>
+                        <div class="col-md-7">{{ expense.created_at|date:"M d, Y H:i" }}</div>
+                    </div>
+                    
+                    {% if expense.status == 'approved' or expense.status == 'rejected' %}
+                    <div class="row mb-2">
+                        <div class="col-md-5 fw-bold">Reviewed By:</div>
+                        <div class="col-md-7">{{ expense.approved_by.get_full_name }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-5 fw-bold">Reviewed On:</div>
+                        <div class="col-md-7">{{ expense.approved_at|date:"M d, Y H:i" }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if expense.status == 'paid' %}
+                    <div class="row mb-2">
+                        <div class="col-md-5 fw-bold">Paid By:</div>
+                        <div class="col-md-7">{{ expense.paid_by.get_full_name }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-5 fw-bold">Paid On:</div>
+                        <div class="col-md-7">{{ expense.paid_at|date:"M d, Y H:i" }}</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-5 fw-bold">Reference:</div>
+                        <div class="col-md-7">{{ expense.payment_reference|default:"N/A" }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if expense.status == 'rejected' and expense.rejection_reason %}
+                    <div class="alert alert-danger mt-3">
+                        <h6 class="fw-bold">Rejection Reason:</h6>
+                        <p class="mb-0">{{ expense.rejection_reason }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Audit Trail -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Audit Trail</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for log in expense_logs %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ log.action }}</h6>
+                                <small>{{ log.timestamp|date:"M d, Y H:i" }}</small>
+                            </div>
+                            <p class="mb-1">{{ log.description }}</p>
+                            <small>By: {{ log.user.get_full_name }}</small>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item text-center text-muted">
+                            No activity logs available
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Back button -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <a href="{% url 'expense_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Expenses
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

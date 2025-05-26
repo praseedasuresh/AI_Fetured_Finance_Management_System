@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Scheduled Reports - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="fas fa-calendar-alt me-2"></i>Scheduled Reports</h2>
+        <p class="text-muted">Manage your scheduled automatic reports</p>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'scheduled_report_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-1"></i> Schedule New Report
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if reports %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Template</th>
+                        <th>Frequency</th>
+                        <th>Next Run</th>
+                        <th>Status</th>
+                        <th>Recipients</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr>
+                        <td>{{ report.title }}</td>
+                        <td>{{ report.template.title }}</td>
+                        <td>{{ report.get_frequency_display }}</td>
+                        <td>{{ report.next_run|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if report.is_active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ report.recipients.count }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{% url 'scheduled_report_run_now' report.id %}" class="btn btn-sm btn-outline-primary" title="Run Now">
+                                    <i class="fas fa-play"></i>
+                                </a>
+                                <a href="{% url 'scheduled_report_update' report.id %}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'scheduled_report_toggle_active' report.id %}" class="btn btn-sm btn-outline-{% if report.is_active %}warning{% else %}success{% endif %}" title="{% if report.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                    <i class="fas fa-{% if report.is_active %}pause{% else %}play{% endif %}"></i>
+                                </a>
+                                <a href="{% url 'scheduled_report_delete' report.id %}" class="btn btn-sm btn-outline-danger" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-calendar-alt fa-4x text-muted mb-3"></i>
+            <h4>No Scheduled Reports</h4>
+            <p class="text-muted">You haven't scheduled any reports yet.</p>
+            <a href="{% url 'scheduled_report_create' %}" class="btn btn-primary mt-2">
+                <i class="fas fa-plus-circle me-1"></i> Schedule Your First Report
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

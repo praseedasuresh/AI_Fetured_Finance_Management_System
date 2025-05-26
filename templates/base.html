@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Finance Management System{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <style>
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        .logo-img {
+            height: 40px;
+            margin-right: 10px;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand logo-container" href="/">
+                <img src="/static/img/logo.svg" alt="FMS Logo" class="logo-img">
+                <span>Finance Management System</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                {% if user.is_authenticated %}
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    
+                    {% if user.is_superuser or user.role == 'admin' or user.role == 'finance_staff' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="feesDropdown" role="button" data-bs-toggle="dropdown">
+                            Fees
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'fee_category_list' %}">Fee Categories</a></li>
+                            <li><a class="dropdown-item" href="{% url 'fee_structure_list' %}">Fee Structures</a></li>
+                            <li><a class="dropdown-item" href="{% url 'student_fee_list' %}">Student Fees</a></li>
+                            <li><a class="dropdown-item" href="{% url 'fee_payment_list' %}">Payments</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="{% url 'budget_dashboard' %}" id="budgetDropdown" role="button" data-bs-toggle="dropdown">
+                            Budget
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'budget_list' %}">Budgets</a></li>
+                            <li><a class="dropdown-item" href="{% url 'budget_allocation_list' %}">Allocations</a></li>
+                            <li><a class="dropdown-item" href="{% url 'budget_transfer_list' %}">Transfers</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="{% url 'expense_dashboard' %}" id="expensesDropdown" role="button" data-bs-toggle="dropdown">
+                            Expenses
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'expense_category_list' %}">Categories</a></li>
+                            <li><a class="dropdown-item" href="{% url 'expense_list' %}">Expenses</a></li>
+                            <li><a class="dropdown-item" href="{% url 'recurring_expense_list' %}">Recurring Expenses</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="{% url 'report_dashboard' %}" id="reportsDropdown" role="button" data-bs-toggle="dropdown">
+                            Reports
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'template_list' %}">Report Templates</a></li>
+                            <li><a class="dropdown-item" href="{% url 'saved_report_list' %}">Generated Reports</a></li>
+                            <li><a class="dropdown-item" href="{% url 'scheduled_report_list' %}">Scheduled Reports</a></li>
+                            <li><a class="dropdown-item" href="{% url 'generate_report' %}">Generate Report</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'ai_dashboard' %}">
+                            <i class="fas fa-robot me-1"></i> AI Assistant
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if user.is_superuser or user.role == 'admin' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                            Administration
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'academic_year_list' %}">Academic Years</a></li>
+                            <li><a class="dropdown-item" href="{% url 'department_list' %}">Departments</a></li>
+                            <li><a class="dropdown-item" href="{% url 'course_list' %}">Courses</a></li>
+                            <li><a class="dropdown-item" href="{% url 'user_list' %}">Users</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="{% url 'profile' %}" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i> {{ user.get_full_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'password_change' %}">Change Password</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                {% else %}
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="container mt-4 mb-5">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </div>
+    
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-auto">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Finance Management System</h5>
+                    <p>A comprehensive system for managing college/university finances.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; {% now "Y" %} Finance Management System. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery (if needed) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="/static/js/script.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

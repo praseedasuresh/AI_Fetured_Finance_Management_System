@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to Finance Management System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 col-lg-8">
+        <div class="card shadow-lg border-0 rounded-lg mt-5 auth-card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="text-center font-weight-light my-2">Welcome to Finance Management System</h3>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <img src="/static/img/logo.svg" alt="Finance Management System Logo" class="img-fluid mb-3" style="max-height: 200px;">
+                    <h4>College/University Finance Management</h4>
+                    <p class="lead">A comprehensive solution for managing educational institution finances</p>
+                </div>
+                
+                <div class="row text-center">
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 border-0 shadow-sm feature-card blue">
+                            <div class="card-body">
+                                <i class="fas fa-money-bill-wave fa-3x text-primary mb-3"></i>
+                                <h5>Fee Management</h5>
+                                <p>Streamline fee collection, payments, and tracking</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 border-0 shadow-sm feature-card green">
+                            <div class="card-body">
+                                <i class="fas fa-chart-pie fa-3x mb-3" style="color: var(--primary-green);"></i>
+                                <h5>Budget Planning</h5>
+                                <p>Allocate and manage departmental budgets efficiently</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 border-0 shadow-sm feature-card lime">
+                            <div class="card-body">
+                                <i class="fas fa-file-invoice-dollar fa-3x mb-3" style="color: var(--primary-lime);"></i>
+                                <h5>Expense Tracking</h5>
+                                <p>Monitor and control expenses with approval workflows</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{% url 'login' %}" class="btn btn-primary btn-lg px-5">Login to System</a>
+                </div>
+            </div>
+            <div class="card-footer text-center py-3">
+                <div class="small"><a href="{% url 'register_admin' %}">Need an account? Register as administrator</a></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

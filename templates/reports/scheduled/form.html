@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ title }} - Finance Management System{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2><i class="fas fa-calendar-alt me-2"></i>{{ title }}</h2>
+        <p class="text-muted">Configure automatic report generation and distribution</p>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'scheduled_report_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to List
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" id="scheduledReportForm">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-3">Report Details</h5>
+                    {{ form.title|as_crispy_field }}
+                    {{ form.description|as_crispy_field }}
+                    {{ form.template|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    <h5 class="mb-3">Schedule Settings</h5>
+                    {{ form.frequency|as_crispy_field }}
+                    {{ form.next_run|as_crispy_field }}
+                    {{ form.is_active|as_crispy_field }}
+                </div>
+            </div>
+            
+            <hr>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-3">Report Parameters</h5>
+                    <div id="parameters-container">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Parameters will be configured when the report runs.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="mb-3">Recipients</h5>
+                    {{ form.recipients_list|as_crispy_field }}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Selected recipients will receive the report by email when it's generated.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-end">
+                <a href="{% url 'scheduled_report_list' %}" class="btn btn-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Save Scheduled Report
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize datetime picker for next_run field
+        flatpickr("#id_next_run", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true
+        });
+        
+        // Initialize select2 for recipients field
+        $('#id_recipients_list').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Select recipients',
+            width: '100%'
+        });
+        
+        // Initialize select2 for template field
+        $('#id_template').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Select a report template',
+            width: '100%'
+        });
+        
+        // Handle template change to update parameters
+        $('#id_template').on('change', function() {
+            const templateId = $(this).val();
+            if (templateId) {
+                // In a real implementation, you would fetch the template parameters via AJAX
+                // and update the parameters field accordingly
+                console.log('Template changed to ID:', templateId);
+            }
+        });
+        
+        // Handle frequency change to update next_run suggestion
+        $('#id_frequency').on('change', function() {
+            const frequency = $(this).val();
+            // In a real implementation, you would calculate and suggest the next run date
+            // based on the selected frequency
+            console.log('Frequency changed to:', frequency);
+        });
+    });
+</script>
+{% endblock %}
