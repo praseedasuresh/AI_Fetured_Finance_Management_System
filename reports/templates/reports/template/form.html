@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="h3 mb-0">{{ title }}</h1>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Report Template Details</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+                                {{ form.title.errors }}
+                                <input type="text" name="{{ form.title.name }}" id="{{ form.title.id_for_label }}" 
+                                       class="form-control {% if form.title.errors %}is-invalid{% endif %}" 
+                                       value="{{ form.title.value|default:'' }}" required>
+                                {% if form.title.help_text %}
+                                <small class="form-text text-muted">{{ form.title.help_text }}</small>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.report_type.id_for_label }}" class="form-label">Report Type</label>
+                                {{ form.report_type.errors }}
+                                <select name="{{ form.report_type.name }}" id="{{ form.report_type.id_for_label }}" 
+                                        class="form-select {% if form.report_type.errors %}is-invalid{% endif %}" required>
+                                    <option value="">Select Report Type</option>
+                                    {% for value, text in form.report_type.field.choices %}
+                                    <option value="{{ value }}" {% if form.report_type.value == value %}selected{% endif %}>{{ text }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.report_type.help_text %}
+                                <small class="form-text text-muted">{{ form.report_type.help_text }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                            {{ form.description.errors }}
+                            <textarea name="{{ form.description.name }}" id="{{ form.description.id_for_label }}" 
+                                      class="form-control {% if form.description.errors %}is-invalid{% endif %}" 
+                                      rows="3">{{ form.description.value|default:'' }}</textarea>
+                            {% if form.description.help_text %}
+                            <small class="form-text text-muted">{{ form.description.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.template_data.id_for_label }}" class="form-label">Template Configuration (JSON)</label>
+                            {{ form.template_data.errors }}
+                            <textarea name="{{ form.template_data.name }}" id="{{ form.template_data.id_for_label }}" 
+                                      class="form-control {% if form.template_data.errors %}is-invalid{% endif %}" 
+                                      rows="10">{{ form.template_data.value|default:'' }}</textarea>
+                            {% if form.template_data.help_text %}
+                            <small class="form-text text-muted">{{ form.template_data.help_text }}</small>
+                            {% endif %}
+                            <div class="form-text">
+                                <p>Example JSON configuration for different report types:</p>
+                                <ul>
+                                    <li><strong>Fee Report:</strong> <code>{"include_details": true, "group_by": "student", "show_unpaid": true}</code></li>
+                                    <li><strong>Budget Report:</strong> <code>{"include_details": true, "group_by": "department", "show_allocations": true}</code></li>
+                                    <li><strong>Expense Report:</strong> <code>{"include_details": true, "group_by": "category", "show_attachments": false}</code></li>
+                                    <li><strong>Financial Summary:</strong> <code>{"include_charts": true, "show_trends": true, "period_comparison": "year"}</code></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="{{ form.is_system.name }}" 
+                                       id="{{ form.is_system.id_for_label }}" {% if form.is_system.value %}checked{% endif %}>
+                                <label class="form-check-label" for="{{ form.is_system.id_for_label }}">
+                                    System Template
+                                </label>
+                                {% if form.is_system.help_text %}
+                                <div class="form-text">{{ form.is_system.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'template_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Templates
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Template
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const reportTypeSelect = document.getElementById('{{ form.report_type.id_for_label }}');
+        const templateDataField = document.getElementById('{{ form.template_data.id_for_label }}');
+        
+        reportTypeSelect.addEventListener('change', function() {
+            const reportType = this.value;
+            if (!templateDataField.value || templateDataField.value === '{}') {
+                let defaultConfig = {};
+                
+                switch(reportType) {
+                    case 'fee':
+                        defaultConfig = {
+                            "include_details": true,
+                            "group_by": "student",
+                            "show_unpaid": true
+                        };
+                        break;
+                    case 'budget':
+                        defaultConfig = {
+                            "include_details": true,
+                            "group_by": "department",
+                            "show_allocations": true
+                        };
+                        break;
+                    case 'expense':
+                        defaultConfig = {
+                            "include_details": true,
+                            "group_by": "category",
+                            "show_attachments": false
+                        };
+                        break;
+                    case 'financial':
+                        defaultConfig = {
+                            "include_charts": true,
+                            "show_trends": true,
+                            "period_comparison": "year"
+                        };
+                        break;
+                    case 'custom':
+                        defaultConfig = {
+                            "custom_fields": [],
+                            "data_source": "",
+                            "filters": []
+                        };
+                        break;
+                }
+                
+                templateDataField.value = JSON.stringify(defaultConfig, null, 2);
+            }
+        });
+    });
+</script>
+{% endblock %}

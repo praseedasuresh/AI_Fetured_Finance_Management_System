@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <!-- Background -->
+  <rect width="500" height="500" fill="#2d2d2d" fill-opacity="0" />
+  
+  <!-- Lime/Yellow Circle (TypeScript) -->
+  <circle cx="200" cy="200" r="150" fill="#a4bd3f" fill-opacity="0.7" />
+  
+  <!-- Green Circle (Ampersand) -->
+  <circle cx="325" cy="200" r="150" fill="#3fbda4" fill-opacity="0.7" />
+  
+  <!-- Blue Circle (Art/Design) -->
+  <circle cx="250" cy="325" r="150" fill="#3f7abd" fill-opacity="0.7" />
+  
+  <!-- TypeScript Logo -->
+  <g transform="translate(125, 150)">
+    <rect x="0" y="0" width="50" height="50" fill="none" stroke="#d4ff50" stroke-width="3" />
+    <text x="25" y="35" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="#d4ff50" text-anchor="middle">TS</text>
+  </g>
+  
+  <!-- Ampersand Symbol -->
+  <g transform="translate(325, 200)">
+    <text x="0" y="15" font-family="Arial, sans-serif" font-size="60" font-weight="bold" fill="#50ffd4" text-anchor="middle">&amp;</text>
+  </g>
+  
+  <!-- Art/Design Symbol (Palette) -->
+  <g transform="translate(250, 325)">
+    <circle cx="0" cy="0" r="30" fill="none" stroke="#50a4ff" stroke-width="3" />
+    <circle cx="-10" cy="-10" r="5" fill="#50a4ff" />
+    <circle cx="10" cy="-5" r="5" fill="#50a4ff" />
+    <circle cx="0" cy="10" r="5" fill="#50a4ff" />
+    <path d="M-15,-15 C-20,0 -15,15 0,20 C15,15 20,0 15,-15" fill="none" stroke="#50a4ff" stroke-width="3" />
+  </g>
+</svg>

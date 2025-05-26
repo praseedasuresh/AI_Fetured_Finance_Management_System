@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Templates - Finance Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Report Templates</h1>
+        <a href="{% url 'template_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Create New Template
+        </a>
+    </div>
+    
+    {% if messages %}
+    <div class="row">
+        <div class="col-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">All Report Templates</h5>
+                </div>
+                <div class="col-auto">
+                    <form method="get" class="d-flex">
+                        <div class="input-group">
+                            <select name="type" class="form-select">
+                                <option value="">All Types</option>
+                                <option value="fee" {% if request.GET.type == 'fee' %}selected{% endif %}>Fee Report</option>
+                                <option value="budget" {% if request.GET.type == 'budget' %}selected{% endif %}>Budget Report</option>
+                                <option value="expense" {% if request.GET.type == 'expense' %}selected{% endif %}>Expense Report</option>
+                                <option value="financial" {% if request.GET.type == 'financial' %}selected{% endif %}>Financial Summary</option>
+                                <option value="custom" {% if request.GET.type == 'custom' %}selected{% endif %}>Custom Report</option>
+                            </select>
+                            <input type="text" name="search" class="form-control" placeholder="Search templates..." value="{{ request.GET.search|default:'' }}">
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>System Template</th>
+                            <th>Created</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for template in templates %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'template_detail' template.id %}">{{ template.title }}</a>
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if template.report_type == 'fee' %}bg-primary
+                                    {% elif template.report_type == 'budget' %}bg-success
+                                    {% elif template.report_type == 'expense' %}bg-danger
+                                    {% elif template.report_type == 'financial' %}bg-info
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ template.get_report_type_display }}
+                                </span>
+                            </td>
+                            <td>{{ template.description|truncatechars:50 }}</td>
+                            <td>
+                                {% if template.is_system %}
+                                <span class="badge bg-warning">System</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Custom</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ template.created_at|date:"M d, Y" }}</td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="{% url 'template_detail' template.id %}" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'generate_report' %}?template={{ template.id }}" class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-file-export"></i>
+                                    </a>
+                                    {% if not template.is_system %}
+                                    <a href="{% url 'template_update' template.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'template_delete' template.id %}" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No report templates found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if templates.has_other_pages %}
+            <div class="p-3 border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="small text-muted">
+                        Showing {{ templates.start_index }} to {{ templates.end_index }} of {{ templates.paginator.count }} templates
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if templates.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}" aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ templates.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for i in templates.paginator.page_range %}
+                                {% if templates.number == i %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ i }}</span>
+                                </li>
+                                {% elif i > templates.number|add:'-3' and i < templates.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ i }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">{{ i }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if templates.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ templates.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ templates.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}" aria-label="Last">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item disabled">
+                                <a class="page-link" href="#" aria-label="Last">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

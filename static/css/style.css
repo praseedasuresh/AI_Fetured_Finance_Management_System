@@ -1,0 +1,189 @@
+/* Finance Management System Custom Styles */
+
+:root {
+  /* Logo Colors */
+  --primary-green: #3fbda4;
+  --primary-blue: #3f7abd;
+  --primary-lime: #a4bd3f;
+  
+  /* Lighter/Darker Variations */
+  --light-green: #5fd9c0;
+  --light-blue: #5b93d9;
+  --light-lime: #c0d95b;
+  
+  --dark-green: #2a9a85;
+  --dark-blue: #2a5a9a;
+  --dark-lime: #859a2a;
+  
+  /* Neutral Colors */
+  --dark-bg: #2d2d2d;
+  --light-bg: #f8f9fa;
+  --text-dark: #333333;
+  --text-light: #ffffff;
+}
+
+/* Override Bootstrap Primary Colors */
+.bg-primary {
+  background-color: var(--primary-blue) !important;
+}
+
+.btn-primary {
+  background-color: var(--primary-blue);
+  border-color: var(--primary-blue);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: var(--dark-blue);
+  border-color: var(--dark-blue);
+}
+
+.text-primary {
+  color: var(--primary-blue) !important;
+}
+
+/* Secondary Button Styles */
+.btn-success {
+  background-color: var(--primary-green);
+  border-color: var(--primary-green);
+}
+
+.btn-success:hover, .btn-success:focus {
+  background-color: var(--dark-green);
+  border-color: var(--dark-green);
+}
+
+.btn-warning {
+  background-color: var(--primary-lime);
+  border-color: var(--primary-lime);
+  color: var(--text-dark);
+}
+
+.btn-warning:hover, .btn-warning:focus {
+  background-color: var(--dark-lime);
+  border-color: var(--dark-lime);
+  color: var(--text-dark);
+}
+
+/* Card Styles */
+.card {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: none;
+}
+
+.card-header {
+  background-color: var(--light-bg);
+  border-bottom: 2px solid var(--primary-blue);
+}
+
+/* Custom Card Border Styles */
+.border-left-primary {
+  border-left: 4px solid var(--primary-blue) !important;
+}
+
+.border-left-success {
+  border-left: 4px solid var(--primary-green) !important;
+}
+
+.border-left-warning {
+  border-left: 4px solid var(--primary-lime) !important;
+}
+
+.border-left-info {
+  border-left: 4px solid var(--light-blue) !important;
+}
+
+/* Navigation Styles */
+.navbar-dark .navbar-nav .nav-link {
+  color: var(--text-light);
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+  color: var(--light-lime);
+}
+
+.dropdown-item:active {
+  background-color: var(--primary-blue);
+}
+
+/* Table Styles */
+.table thead th {
+  background-color: var(--light-bg);
+  border-bottom: 2px solid var(--primary-blue);
+}
+
+/* Alert Styles */
+.alert-info {
+  background-color: rgba(63, 122, 189, 0.1);
+  border-color: var(--primary-blue);
+  color: var(--dark-blue);
+}
+
+.alert-success {
+  background-color: rgba(63, 189, 164, 0.1);
+  border-color: var(--primary-green);
+  color: var(--dark-green);
+}
+
+.alert-warning {
+  background-color: rgba(164, 189, 63, 0.1);
+  border-color: var(--primary-lime);
+  color: var(--dark-lime);
+}
+
+/* Badge Styles */
+.badge.bg-success {
+  background-color: var(--primary-green) !important;
+}
+
+.badge.bg-warning {
+  background-color: var(--primary-lime) !important;
+  color: var(--text-dark);
+}
+
+.badge.bg-info {
+  background-color: var(--primary-blue) !important;
+}
+
+/* Progress Bar */
+.progress-bar.bg-info {
+  background-color: var(--primary-blue) !important;
+}
+
+/* Footer */
+footer.bg-dark {
+  background-color: var(--dark-bg) !important;
+}
+
+/* Dashboard Chart Colors */
+.chart-area .chartjs-render-monitor {
+  --chart-color-1: var(--primary-blue);
+  --chart-color-2: var(--primary-green);
+  --chart-color-3: var(--primary-lime);
+}
+
+/* Login/Home Page Styling */
+.auth-card {
+  border-top: 4px solid var(--primary-blue);
+}
+
+/* Feature Cards on Home Page */
+.feature-card {
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+}
+
+.feature-card.green {
+  border-top: 3px solid var(--primary-green);
+}
+
+.feature-card.blue {
+  border-top: 3px solid var(--primary-blue);
+}
+
+.feature-card.lime {
+  border-top: 3px solid var(--primary-lime);
+}
