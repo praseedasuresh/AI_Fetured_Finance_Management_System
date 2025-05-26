@@ -144,6 +144,6 @@ Make sure you have collected static files:
 python manage.py collectstatic
 ```
 
-## License
+##Author
 
-[MIT License](LICENSE)
+Praseeda_G_Suresh
