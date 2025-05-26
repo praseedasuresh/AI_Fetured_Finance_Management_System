@@ -1,0 +1,1 @@
+# Migrations for AI Assistant app

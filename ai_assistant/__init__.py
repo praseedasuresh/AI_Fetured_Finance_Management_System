@@ -1,0 +1,1 @@
+# AI Assistant app for Finance Management System
